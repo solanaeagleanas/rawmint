@@ -1,8 +1,9 @@
 import { useEffect, useState } from "react";
 import styled from "styled-components";
 import Countdown from "react-countdown";
-import { Button, CircularProgress, Snackbar } from "@material-ui/core";
+import { Button, CircularProgress, Snackbar,Avatar } from "@material-ui/core";
 import Alert from "@material-ui/lab/Alert";
+import solana from "./NFT.gif";
 
 import * as anchor from "@project-serum/anchor";
 
@@ -10,6 +11,9 @@ import { LAMPORTS_PER_SOL } from "@solana/web3.js";
 
 import { useAnchorWallet } from "@solana/wallet-adapter-react";
 import { WalletDialogButton } from "@solana/wallet-adapter-material-ui";
+import mylogo from "./Logo.png";
+
+
 
 import {
   CandyMachine,
@@ -42,8 +46,6 @@ const Home = (props: HomeProps) => {
   const [isSoldOut, setIsSoldOut] = useState(false); // true when items remaining is zero
   const [isMinting, setIsMinting] = useState(false); // true when user got to press MINT
 
-  const [itemsAvailable, setItemsAvailable] = useState(0);
-  const [itemsRedeemed, setItemsRedeemed] = useState(0);
   const [itemsRemaining, setItemsRemaining] = useState(0);
 
   const [alertState, setAlertState] = useState<AlertState>({
@@ -56,6 +58,12 @@ const Home = (props: HomeProps) => {
 
   const wallet = useAnchorWallet();
   const [candyMachine, setCandyMachine] = useState<CandyMachine>();
+  const [numberofmint,setNumber]=useState(1);
+  const handleChange=(e:any)=>{
+    setNumber( e.target.value);
+ }
+
+
 
   const refreshCandyMachineState = () => {
     (async () => {
@@ -64,19 +72,15 @@ const Home = (props: HomeProps) => {
       const {
         candyMachine,
         goLiveDate,
-        itemsAvailable,
         itemsRemaining,
-        itemsRedeemed,
       } = await getCandyMachineState(
         wallet as anchor.Wallet,
         props.candyMachineId,
         props.connection
       );
 
-      setItemsAvailable(itemsAvailable);
       setItemsRemaining(itemsRemaining);
-      setItemsRedeemed(itemsRedeemed);
-
+ 
       setIsSoldOut(itemsRemaining === 0);
       setStartDate(goLiveDate);
       setCandyMachine(candyMachine);
@@ -87,6 +91,8 @@ const Home = (props: HomeProps) => {
     try {
       setIsMinting(true);
       if (wallet && candyMachine?.program) {
+        for(var i = 1 ; i <= numberofmint ; i ++){
+   
         const mintTxId = await mintOneToken(
           candyMachine,
           props.config,
@@ -115,7 +121,7 @@ const Home = (props: HomeProps) => {
             severity: "error",
           });
         }
-      }
+      }}
     } catch (error: any) {
       // TODO: blech:
       let message = error.msg || "Minting failed! Please try again!";
@@ -166,27 +172,89 @@ const Home = (props: HomeProps) => {
   ]);
 
   return (
-    <main>
+    <main style={{display:"flex",flexDirection:"column",justifyContent:"center",alignItems:"center",marginTop:10}}>
+      <div style={{display:"flex",flexDirection:"row"}}>
+      <Avatar
+              alt="Remy Sharp"
+              style={{
+                width: "60px",
+                height: "60px",
+                
+              }}
+              variant="square"
+              src={mylogo}
+            />
+        <span style={{fontSize:35,color:"#fdd700",fontFamily:"Cambria",marginTop:10,marginLeft:10}}>SolanaEagles</span>
+      </div>
+      <div >
+       <Avatar
+              alt="Remy Sharp"
+              style={{
+                width: "160px",
+                height: "160px",
+                marginTop:10
+              }}
+              variant="square"
+              src={solana}
+            />
+            </div>
+            <br/>
+  <div>
       {wallet && (
-        <p>Wallet {shortenAddress(wallet.publicKey.toBase58() || "")}</p>
+        <h4 style={{fontSize:17,color:"#fdd700"}}>Wallet Address :  {shortenAddress(wallet.publicKey.toBase58() || "")}</h4>
       )}
 
-      {wallet && <p>Balance: {(balance || 0).toLocaleString()} SOL</p>}
+      {wallet && <h4 style={{fontSize:17,color:"#fdd700"}}>Balance: {(balance || 0).toLocaleString()} SOL</h4>
+}
 
-      {wallet && <p>Total Available: {itemsAvailable}</p>}
+{wallet &&
+  <h4 style={{fontSize:17,color:"#fdd700"}}>Select number of NFTs :</h4>}
+     {
+  wallet &&
+  
+<form>
+             <input type="radio" value="1" id="1"
+               onChange={handleChange} name="number" />
+             <label >&nbsp;<span style={{color:"#fdd700"}}>1</span></label>
+             <br />
 
-      {wallet && <p>Redeemed: {itemsRedeemed}</p>}
+            <input type="radio" value="2" id="2"
+              onChange={handleChange} name="number"/>
+            <label style={{color:"#fdd700"}} >&nbsp;2</label><br />
+            <input type="radio" value="3" id="3"
+              onChange={handleChange} name="number"/>
+            <label style={{color:"#fdd700"}}>&nbsp;3</label><br />
+            <input type="radio" value="4" id="4"
+              onChange={handleChange} name="number"/>
+            <label style={{color:"#fdd700"}} >&nbsp;4</label><br />
+            <input type="radio" value="5" id="5"
+              onChange={handleChange} name="number"/>
+            <label style={{color:"#fdd700"}} >&nbsp;5</label><br />
+            <h4 style={{fontSize:17,color:"#fdd700"}}>You want to mint <span style={{color:"white"}}>{numberofmint}</span> NFTS</h4>
+      
+         </form>
 
-      {wallet && <p>Remaining: {itemsRemaining}</p>}
+      
+      
+      }
+   
+      </div>
 
-      <MintContainer>
+      
+      <div>
+  
+      </div>
+      <div>
+
+      <MintContainer >
         {!wallet ? (
-          <ConnectButton>Connect Wallet</ConnectButton>
+          <ConnectButton style={{backgroundColor:"#fdd700",color:"black",width:"100%"}}><b>Connect Wallet</b></ConnectButton>
         ) : (
           <MintButton
             disabled={isSoldOut || isMinting || !isActive}
             onClick={onMint}
             variant="contained"
+            style={{backgroundColor:"#fdd700",color:"black",width:"100%",marginBottom:50}}
           >
             {isSoldOut ? (
               "SOLD OUT"
@@ -207,7 +275,8 @@ const Home = (props: HomeProps) => {
           </MintButton>
         )}
       </MintContainer>
-
+      </div>
+      <div>
       <Snackbar
         open={alertState.open}
         autoHideDuration={6000}
@@ -220,6 +289,7 @@ const Home = (props: HomeProps) => {
           {alertState.message}
         </Alert>
       </Snackbar>
+      </div>
     </main>
   );
 };
